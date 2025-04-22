@@ -1,0 +1,176 @@
+==============================================================================
+http://localhost:5000/api/auth/register
+{
+  "name": "rajesh sharma",
+  "email": "rajesh@example.com",
+  "password": "rajesh123",
+  "role": "photographer"
+}
+==============================================================================
+
+==============================================================================
+http://localhost:5000/api/auth/login
+{
+  "email": "ravi@example.com",
+  "password": "ravi123"
+}
+==============================================================================
+
+
+
+
+==============================================================================
+http://localhost:5000/api/photographer/search?photoshootTypes=wedding
+http://localhost:5000/api/photographer/search?location=Delhi
+http://localhost:5000/api/photographer/search?minPrice=2000&maxPrice=6000
+http://localhost:5000/api/photographer/search?rating=4
+http://localhost:5000/api/photographer/search?location=Delhi&photoshootTypes=wedding
+http://localhost:5000/api/photographer/search?location=Delhi&minPrice=2000&maxPrice=6000
+http://localhost:5000/api/photographer/search?location=Delhi&photoshootTypes=wedding&rating=4
+http://localhost:5000/api/photographer/search?location=Delhi&photoshootTypes=wedding&rating=4
+http://localhost:5000/api/photographer/search?photoshootTypes=pre-wedding&minPrice=3000&maxPrice=7000
+http://localhost:5000/api/photographer/search?photoshootTypes=pre-wedding&minPrice=3000&maxPrice=7000
+http://localhost:5000/api/photographer/search?location=Mumbai&photoshootTypes=wedding&minPrice=2500&maxPrice=6000&rating=4
+http://localhost:5000/api/photographer/search?photoshootTypes=wedding,pre-wedding
+==============================================================================
+
+
+
+==============================================================================
+Create Booking: POST /api/bookings
+
+Get Bookings (Photographer): GET /api/bookings/photographer/:photographerId
+
+Get Bookings (Client): GET /api/bookings/client/:clientId
+
+Update Booking Status: PATCH /api/bookings/:bookingId/status
+{
+    "clientId": "68039c7057c209426a8a4811",
+    "photographerId": "6803896bb93c936dde804999",
+    "shootDate": "2025-04-25T10:00:00.000Z",
+    "shootType": "pre-wedding",
+    "location": "Mumbai",
+    "status": "pending",
+    "price": 5000,
+    "notes": "Please bring extra lighting.",
+    "_id": "6803beb178e3e23e1762e23e",
+    "createdAt": "2025-04-19T15:18:09.764Z",
+    "updatedAt": "2025-04-19T15:18:09.764Z",
+    "__v": 0
+}
+==============================================================================
+
+
+==============================================================================
+You can now go ahead and test the /api/reviews endpoints in Postman:
+POST /api/reviews – create review
+{
+  "_id": "6803beb178e3e23e1762e23e",
+  "clientId": "68039c7057c209426a8a4811",
+  "photographerId": "6803896bb93c936dde804999",
+  "rating": 5,
+  "comment": "Amazing pre-wedding shoot! Highly recommended!",
+  "createdAt": "2025-04-19T15:18:09.764Z",
+  "updatedAt": "2025-04-19T15:18:09.764Z"
+}
+GET /api/reviews/:photographerId – get all reviews
+[
+    {
+        "_id": "6803c902bad4fa18546a7ce5",
+        "clientId": {
+            "_id": "68039c7057c209426a8a4811",
+            "name": "Ravi Kumar"
+        },
+        "photographerId": "6803896bb93c936dde804999",
+        "rating": 5,
+        "comment": "Amazing pre-wedding shoot! Highly recommended!",
+        "createdAt": "2025-04-19T16:02:10.653Z",
+        "updatedAt": "2025-04-19T16:02:10.653Z",
+        "__v": 0
+    },
+    {
+        "_id": "6803c57bbad4fa18546a7cd6",
+        "clientId": {
+            "_id": "68039c7057c209426a8a4811",
+            "name": "Ravi Kumar"
+        },
+        "photographerId": "6803896bb93c936dde804999",
+        "rating": 5,
+        "comment": "Amazing pre-wedding shoot!",
+        "bookingId": "6803beb178e3e23e1762e23e",
+        "createdAt": "2025-04-19T15:47:07.292Z",
+        "updatedAt": "2025-04-19T15:47:07.292Z",
+        "__v": 0
+    }
+]
+GET /api/reviews/:photographerId/rating – get average rating
+{
+    "message": "Failed to calculate rating",
+    "error": "Cannot read properties of undefined (reading 'ObjectId')"
+}
+==============================================================================
+
+
+
+
+
+
+
+
+==============================================================================
+Your Client Module (User Profile) is now ready and can be tested with:
+POST /api/client/profile (Creating a new profile)
+GET /api/client/profile?userId=xxxx (Fetching a profile by userId)
+PUT /api/client/profile (Updating the profile)
+POST /api/client/login (Logging in and generating a JWT token)
+==============================================================================
+
+
+==============================================================================
+                                                Testing the Admin/Lead Management API
+POST /api/admin/lead - Create a new lead.
+Headers:
+{
+  "Authorization": "Bearer <your_token_here>",
+  "Content-Type": "application/json"
+}
+Body (raw JSON):
+{
+  "clientId": "6622ea36567d4630f4d7f7c5",
+  "photographerId": "662a3f7becc2c66c56d93e21"
+}
+
+GET /api/admin/leads - Get all leads.
+Headers:
+{
+  "Authorization": "Bearer <your_token_here>"
+}
+This will return a list of all leads with populated clientId and photographerId.
+
+PUT /api/admin/lead/status - Update the status of a lead.
+Headers:
+{
+  "Authorization": "Bearer <your_token_here>",
+  "Content-Type": "application/json"
+}
+Body (raw JSON):
+{
+  "leadId": "68049716559ce16666f24c09",
+  "status": "completed"
+}
+✅ Valid statuses: "pending", "assigned", "completed"
+
+Notes
+Make sure the JWT token is valid (not expired).
+Ensure that the IDs (clientId, photographerId, leadId) exist in your MongoDB.
+If you don’t yet have a photographer model or registration, you can mock one in MongoDB temporarily using MongoDB Compass or an admin API.
+==============================================================================
+
+
+
+==============================================================================
+
+
+
+==============================================================================
+
