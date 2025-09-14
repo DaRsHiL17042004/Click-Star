@@ -127,7 +127,7 @@ POST /api/client/login (Logging in and generating a JWT token)
 
 
 ==============================================================================
-                                                Testing the Admin/Lead Management API
+Testing the Admin/Lead Management API
 POST /api/admin/lead - Create a new lead.
 Headers:
 {
