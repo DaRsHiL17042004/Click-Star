@@ -1,66 +1,68 @@
-const photographer = require('../models/photographer.js');
+// backend/controllers/photographer.controller.js
+const mongoose = require('mongoose');
+const Photographer = require('../models/photographer');
+const { ensurePhotographerProfile } = require('../services/profile.service');
+const User = require('../models/user.model');
 
-// Create or update the photographer's profile
+// Fields a photographer may edit on their own profile.
+const EDITABLE = ['name', 'bio', 'location', 'specialties', 'pricing', 'phone', 'website', 'instagram', 'availability', 'portfolio', 'coverImage', 'yearsExperience'];
+const pick = (body) => Object.fromEntries(EDITABLE.filter((k) => body[k] !== undefined).map((k) => [k, body[k]]));
+const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+// POST /api/photographer/profile — create or update the signed-in photographer's profile
 const createOrUpdateProfile = async (req, res) => {
-  const { id } = req.user; // Assuming user ID is in the authentication middleware (JWT or session)
-  const profileData = req.body;
-
   try {
-    // If a profile exists, update it; if not, create a new one
-    const photographer = await photographer.findOneAndUpdate(
-      { _id: id }, // Assuming the photographer is identified by user ID (from session or JWT)
-      profileData,
-      { new: true, upsert: true } // This will create a new profile if none exists
+    const profile = await Photographer.findOneAndUpdate(
+      { _id: req.user.id },
+      { $set: pick(req.body) },
+      { new: true, upsert: true, runValidators: true, setDefaultsOnInsert: true }
     );
-
-    res.status(200).json(photographer);
+    res.status(200).json(profile);
   } catch (error) {
     console.error('Error updating/creating profile:', error);
     res.status(400).json({ message: error.message });
   }
 };
 
-// Get the photographer's profile
+// GET /api/photographer/profile — the signed-in photographer's profile
 const getProfile = async (req, res) => {
-  const { id } = req.user;
-
   try {
-    const photographer = await photographer.findOne({ _id: id });
-    if (!photographer) return res.status(404).json({ message: 'Profile not found' });
-
-    res.status(200).json(photographer);
+    let profile = await Photographer.findById(req.user.id);
+    if (!profile) {
+      // Accounts created before profiles were auto-provisioned.
+      const user = await User.findById(req.user.id);
+      if (!user) return res.status(404).json({ message: 'Profile not found' });
+      profile = await ensurePhotographerProfile(user);
+    }
+    res.status(200).json(profile);
   } catch (error) {
     console.error('Error fetching profile:', error);
     res.status(400).json({ message: error.message });
   }
 };
 
-// Get photographer's profile by ID
+// GET /api/photographer/profile/:id — public profile
 const getProfileById = async (req, res) => {
-  const { id } = req.params;
-
+  if (!mongoose.isValidObjectId(req.params.id)) return res.status(404).json({ message: 'Profile not found' });
   try {
-    const photographer = await photographer.findById(id);
-    if (!photographer) return res.status(404).json({ message: 'Profile not found' });
-
-    res.status(200).json(photographer);
+    const profile = await Photographer.findById(req.params.id);
+    if (!profile) return res.status(404).json({ message: 'Profile not found' });
+    res.status(200).json(profile);
   } catch (error) {
     console.error('Error fetching profile:', error);
     res.status(400).json({ message: error.message });
   }
 };
 
-// Search photographers based on query params (e.g., specialties, location)
+// GET /api/photographer/search?location=&specialties=a,b
 const searchphotographers = async (req, res) => {
-  const { location, specialties } = req.query;
-
   try {
-    let searchCriteria = {};
+    const { location, specialties } = req.query;
+    const criteria = {};
+    if (location) criteria.location = new RegExp(`^${escapeRegex(String(location).trim())}$`, 'i');
+    if (specialties) criteria.specialties = { $in: String(specialties).split(',').map((s) => s.trim()).filter(Boolean) };
 
-    if (location) searchCriteria.location = location;
-    if (specialties) searchCriteria.specialties = { $in: specialties.split(',') }; // specialties is an array
-
-    const photographers = await photographer.find(searchCriteria);
+    const photographers = await Photographer.find(criteria).sort({ updatedAt: -1 });
     res.status(200).json(photographers);
   } catch (error) {
     console.error('Error searching photographers:', error);
@@ -68,26 +70,16 @@ const searchphotographers = async (req, res) => {
   }
 };
 
-// Handle uploading portfolio images/videos (e.g., storing in cloud or file system)
+// POST /api/photographer/upload — returns public URLs; the client saves them via /profile
 const uploadPortfolio = (req, res) => {
-  // Assuming `upload` middleware processes the file upload
-  try {
-    if (!req.files || req.files.length === 0) {
-      return res.status(400).json({ message: 'No files uploaded' });
-    }
-
-    const portfolioUrls = req.files.map(file => file.path); // Assuming the uploaded file has a `path` property
-    res.status(200).json({ message: 'Files uploaded successfully', portfolioUrls });
-  } catch (error) {
-    console.error('Error uploading files:', error);
-    res.status(400).json({ message: error.message });
+  if (!req.files || req.files.length === 0) {
+    return res.status(400).json({ message: 'No files uploaded' });
   }
+  const base = (process.env.PUBLIC_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
+  const portfolioUrls = req.files.map((file) =>
+    /^https?:\/\//.test(file.path) ? file.path : `${base}/uploads/${file.filename}`
+  );
+  res.status(200).json({ message: 'Files uploaded successfully', portfolioUrls });
 };
 
-module.exports = {
-  createOrUpdateProfile,
-  getProfile,
-  getProfileById,
-  searchphotographers,
-  uploadPortfolio
-};
+module.exports = { createOrUpdateProfile, getProfile, getProfileById, searchphotographers, uploadPortfolio };

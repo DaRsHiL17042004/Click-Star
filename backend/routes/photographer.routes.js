@@ -1,22 +1,24 @@
 const express = require('express');
 const photographerController = require('../controllers/photographer.controller');
-const authenticate = require('../middlewares/auth.middleware');
+const { authenticate, requireRole } = require('../middlewares/auth.middleware');
 const upload = require('../services/fileUpload.service');
+
 const router = express.Router();
+const photographerOnly = [authenticate, requireRole('photographer')];
 
-// Route to create or update photographer's profile
-router.post('/profile', authenticate, photographerController.createOrUpdateProfile);
+// Create or update the signed-in photographer's profile
+router.post('/profile', ...photographerOnly, photographerController.createOrUpdateProfile);
 
-// Route to get photographer's profile
-router.get('/profile', authenticate, photographerController.getProfile);
+// Get the signed-in photographer's profile
+router.get('/profile', ...photographerOnly, photographerController.getProfile);
 
-// Route to upload portfolio images/videos
-router.post('/upload', authenticate, upload.array('portfolio', 10), photographerController.uploadPortfolio);
+// Upload portfolio images/videos (field name: "portfolio", max 10 files)
+router.post('/upload', ...photographerOnly, upload.array('portfolio', 10), photographerController.uploadPortfolio);
 
-// Search photographers based on some criteria (location, specialties, etc.)
+// Public: search photographers by location / specialties
 router.get('/search', photographerController.searchphotographers);
 
-// Get photographer's profile by ID
+// Public: photographer profile by ID
 router.get('/profile/:id', photographerController.getProfileById);
 
 module.exports = router;

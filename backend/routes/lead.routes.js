@@ -1,19 +1,14 @@
-// This file defines the routes for lead management in the application.
-// It includes routes for creating a lead, getting all leads, and updating lead status.
-
-// routes/lead.routes.js
+// routes/lead.routes.js — admin-only endpoints, mounted at /api/admin
 const express = require('express');
-const router = express.Router();
 const leadController = require('../controllers/lead.controller');
-const authenticate = require('../middlewares/auth.middleware');  // Authentication middleware
+const { authenticate, requireRole } = require('../middlewares/auth.middleware');
 
-// POST - Create a lead
-router.post('/lead', authenticate, leadController.createLead);
+const router = express.Router();
+router.use(authenticate, requireRole('admin'));
 
-// GET - Get all leads
-router.get('/leads', authenticate, leadController.getAllLeads);
-
-// PUT - Update lead status
-router.put('/lead/status', authenticate, leadController.updateLeadStatus);
+router.post('/lead', leadController.createLead);
+router.get('/leads', leadController.getAllLeads);
+router.put('/lead/status', leadController.updateLeadStatus);
+router.get('/users', leadController.getAllUsers);
 
 module.exports = router;

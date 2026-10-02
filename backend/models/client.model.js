@@ -9,18 +9,19 @@ const clientSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   phone: String,
   location: String,
-  password: { type: String, required: true },
+  // Legacy: accounts now authenticate through the User model.
+  password: { type: String, select: false },
   favorites: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Photographer' }],
 }, { timestamps: true });
 
-clientSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) return next();
+clientSchema.pre('save', async function () {
+  if (!this.password || !this.isModified('password')) return;
   this.password = await bcrypt.hash(this.password, 10);
-  next();
 });
 
 clientSchema.methods.comparePassword = async function(candidatePassword) {
-  return await bcrypt.compare(candidatePassword, this.password);
+  if (!this.password) return false;
+  return bcrypt.compare(candidatePassword, this.password);
 };
 
 module.exports = mongoose.model('Client', clientSchema);
