@@ -1,17 +1,17 @@
-// File: backend/routes/review.routes.js
-// Description: Routes for handling reviews of photographers
-
+// backend/routes/review.routes.js
 const express = require('express');
-const router = express.Router();
 const reviewController = require('../controllers/review.controller');
+const { authenticate, requireRole } = require('../middlewares/auth.middleware');
 
-// POST /api/reviews - Create a new review
-router.post('/', reviewController.createReview);
+const router = express.Router();
 
-// GET /api/reviews/:photographerId - Get reviews for a photographer
-router.get('/:photographerId', reviewController.getReviewsByPhotographer);
+// POST /api/reviews — signed-in clients only
+router.post('/', authenticate, requireRole('client'), reviewController.createReview);
 
-// GET /api/reviews/:photographerId/rating - Get average rating of a photographer
+// GET /api/reviews/:photographerId/rating — average rating (public)
 router.get('/:photographerId/rating', reviewController.getAverageRating);
+
+// GET /api/reviews/:photographerId — reviews for a photographer (public)
+router.get('/:photographerId', reviewController.getReviewsByPhotographer);
 
 module.exports = router;

@@ -1,30 +1,31 @@
-// Description: Controller for handling review-related requests
-
-
+// backend/controllers/review.controller.js
 const reviewService = require('../services/review.service');
-const mongoose = require('mongoose');
+
+const fail = (res, err, fallback) =>
+  res.status(err.status || 500).json({ message: err.status ? err.message : fallback });
+
+// POST /api/reviews — the reviewer is always the signed-in client
 exports.createReview = async (req, res) => {
   try {
-    const review = await reviewService.createReview(req.body);
+    const review = await reviewService.createReview({ ...req.body, clientId: req.user.id });
     res.status(201).json(review);
   } catch (err) {
-    res.status(500).json({ message: 'Failed to create review', error: err.message });
+    fail(res, err, 'Failed to create review');
   }
 };
 
 exports.getReviewsByPhotographer = async (req, res) => {
   try {
-    const reviews = await reviewService.getReviewsByPhotographer(req.params.photographerId);
-    res.json(reviews);
+    res.json(await reviewService.getReviewsByPhotographer(req.params.photographerId));
   } catch (err) {
-    res.status(500).json({ message: 'Failed to fetch reviews', error: err.message });
+    fail(res, err, 'Failed to fetch reviews');
   }
 };
+
 exports.getAverageRating = async (req, res) => {
-    try {
-      const result = await reviewService.getAverageRating(req.params.photographerId);
-      res.json(result);
-    } catch (error) {
-      res.status(500).json({ message: 'Failed to calculate rating', error: error.message });
-    }
-  };
+  try {
+    res.json(await reviewService.getAverageRating(req.params.photographerId));
+  } catch (err) {
+    fail(res, err, 'Failed to calculate rating');
+  }
+};

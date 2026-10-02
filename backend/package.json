@@ -4,12 +4,13 @@
   "main": "app.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "create-admin": "node scripts/create-admin.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "Click-Star REST API \u2014 Express + MongoDB",
   "dependencies": {
     "bcrypt": "^5.1.1",
     "cloudinary": "^1.41.3",
@@ -25,5 +26,8 @@
   },
   "devDependencies": {
     "nodemon": "^3.1.9"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }

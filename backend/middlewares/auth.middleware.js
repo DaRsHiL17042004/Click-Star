@@ -1,21 +1,31 @@
 // backend/middlewares/auth.middleware.js
 const jwt = require('jsonwebtoken');
 
+/** Verifies the Bearer token and attaches `{ id, email, role }` to req.user. */
 const authenticate = (req, res, next) => {
-  const token = req.headers['authorization']?.split(' ')[1]; // Extract token from Authorization header
+  const header = req.headers.authorization || '';
+  const [scheme, token] = header.split(' ');
 
-  if (!token) {
-    return res.status(403).json({ message: 'No token provided' });
+  if (scheme !== 'Bearer' || !token) {
+    return res.status(401).json({ message: 'Authentication required' });
   }
 
   try {
-    // Verify the token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded; // Attach user information to the request object
-    next(); // Proceed to the next middleware or route handler
+    req.user = jwt.verify(token, process.env.JWT_SECRET);
+    return next();
   } catch (err) {
     return res.status(401).json({ message: 'Invalid or expired token' });
   }
 };
 
+/** Restricts a route to one or more roles. Use after `authenticate`. */
+const requireRole = (...roles) => (req, res, next) => {
+  if (!req.user || !roles.includes(req.user.role)) {
+    return res.status(403).json({ message: 'You do not have permission to do that' });
+  }
+  return next();
+};
+
 module.exports = authenticate;
+module.exports.authenticate = authenticate;
+module.exports.requireRole = requireRole;

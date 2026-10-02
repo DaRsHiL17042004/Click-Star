@@ -1,21 +1,21 @@
-// This file defines the routes for booking-related operations in the application.
-// It includes routes for creating bookings, retrieving bookings for photographers and clients,
-
+// backend/routes/booking.routes.js
 const express = require('express');
-const router = express.Router();
 const bookingController = require('../controllers/booking.controller');
+const { authenticate, requireRole } = require('../middlewares/auth.middleware');
+
+const router = express.Router();
+router.use(authenticate);
 
 // Client creates a booking
-router.post('/', bookingController.createBooking);
+router.post('/', requireRole('client'), bookingController.createBooking);
 
-// Photographer gets all bookings
+// Photographer (or admin) lists their bookings
 router.get('/photographer/:photographerId', bookingController.getPhotographerBookings);
 
-// Client gets their own bookings
+// Client (or admin) lists their bookings
 router.get('/client/:clientId', bookingController.getClientBookings);
 
-// Update booking status (confirm/cancel/complete)
+// Update booking status (confirm / complete / cancel) — rules in booking.service
 router.patch('/:bookingId/status', bookingController.updateBookingStatus);
 
 module.exports = router;
-

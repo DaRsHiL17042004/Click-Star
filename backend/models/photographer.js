@@ -16,8 +16,9 @@ const photographerSchema = new mongoose.Schema({
   website: { type: String },
   instagram: { type: String },
   availability: [{ type: String }], // array of dates/slots
+  portfolio: [{ type: String }],    // image/video URLs
+  coverImage: { type: String },
+  yearsExperience: { type: Number, min: 0 },
 }, { timestamps: true });
 
-const photographer = mongoose.model('Photographer', photographerSchema);
-
-module.exports = photographer;
+module.exports = mongoose.model('Photographer', photographerSchema);
