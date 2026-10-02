@@ -1,6 +1,159 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-.input {
-    @apply w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-400;
+/*
+  Click-Star design tokens
+  Concept: "darkroom & contact sheet" — fibre-paper surfaces, carbon ink,
+  and a single safelight-vermilion accent. Mono metadata nods to EXIF data.
+*/
+@layer base {
+  :root,
+  [data-theme="light"] {
+    --bg: 40 36% 94%;
+    --surface: 42 40% 97%;
+    --surface-2: 38 26% 90%;
+    --ink: 30 18% 9%;
+    --muted: 30 7% 38%;
+    --faint: 32 8% 62%;
+    --line: 32 18% 80%;
+    --accent: 12 74% 44%;
+    --accent-ink: 40 40% 97%;
+    --accent-soft: 14 70% 92%;
+    --success: 150 45% 30%;
+    --warning: 36 85% 38%;
+    --danger: 356 65% 44%;
+    --shadow: 30 30% 20%;
+    color-scheme: light;
   }
-  
+
+  [data-theme="dark"] {
+    --bg: 30 12% 6%;
+    --surface: 30 10% 9%;
+    --surface-2: 30 8% 13%;
+    --ink: 40 28% 92%;
+    --muted: 36 9% 64%;
+    --faint: 34 6% 42%;
+    --line: 30 7% 19%;
+    --accent: 13 82% 58%;
+    --accent-ink: 30 18% 7%;
+    --accent-soft: 13 40% 16%;
+    --success: 150 40% 55%;
+    --warning: 38 85% 60%;
+    --danger: 356 70% 64%;
+    --shadow: 0 0% 0%;
+    color-scheme: dark;
+  }
+
+  * {
+    @apply border-line;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-bg font-sans text-base text-ink;
+    font-feature-settings: "ss01", "cv11";
+  }
+
+  h1, h2, h3, h4 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  ::selection {
+    background: hsl(var(--accent) / 0.22);
+  }
+
+  :focus-visible {
+    outline: 2px solid hsl(var(--accent));
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  img {
+    background: hsl(var(--surface-2));
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  .eyebrow {
+    @apply font-mono text-xs uppercase tracking-[0.14em] text-muted;
+  }
+
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      hsl(var(--surface-2)) 25%,
+      hsl(var(--line) / 0.6) 50%,
+      hsl(var(--surface-2)) 75%
+    );
+    background-size: 200% 100%;
+    @apply animate-shimmer rounded;
+  }
+
+  /* Film-grain overlay used on hero imagery */
+  .grain::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.18;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.9'/></svg>");
+  }
+
+  /* Contact-sheet crop marks */
+  .crop-marks {
+    position: relative;
+  }
+  .crop-marks::before,
+  .crop-marks::after {
+    content: "";
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    pointer-events: none;
+    border-color: hsl(var(--ink) / 0.5);
+  }
+  .crop-marks::before {
+    top: -8px;
+    left: -8px;
+    border-top-width: 1px;
+    border-left-width: 1px;
+  }
+  .crop-marks::after {
+    bottom: -8px;
+    right: -8px;
+    border-bottom-width: 1px;
+    border-right-width: 1px;
+  }
+
+  .hairline {
+    border-color: hsl(var(--line));
+  }
+
+  .scrollbar-none {
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+}
