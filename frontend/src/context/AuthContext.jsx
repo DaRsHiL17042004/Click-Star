@@ -89,7 +89,7 @@ export const AuthProvider = ({ children }) => {
   // Register function
   const register = async (userData) => {
     try {
-      const response = await axios.post("http://localhost:5000/api/auth/register", userData);
+      await axios.post("http://localhost:5000/api/auth/register", userData);
       toast.success("Registration successful! Please log in.");
       return { success: true };
     } catch (error) {

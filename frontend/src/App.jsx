@@ -7,8 +7,7 @@ import RegisterPage from "./pages/Auth/RegisterPage";
 import AdminDashboard from "./pages/dashboards/AdminDashboard";
 import PhotographerDashboard from "./pages/dashboards/PhotographerDashboard";
 import ClientDashboard from "./pages/dashboards/ClientDashboard";
-import PhotographerProfile from "./components/dashboard/photographer/PhotographerProfile";
-import { AuthProvider, useAuth } from "./context/AuthContext";
+import { useAuth } from "./context/AuthContext";
 import { AnimatePresence } from "framer-motion";
 import LandingPage from "./pages/LandingPage";
 import BookingPage from "./pages/BookingPage";
@@ -48,8 +47,7 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
 const App = () => {
   return (
     <>
-      <AuthProvider>
-        <AnimatePresence mode="wait">
+      <AnimatePresence mode="wait">
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<LoginPage />} />
@@ -111,10 +109,9 @@ const App = () => {
 
             <Route path="*" element={<NotFound />} />
           </Routes>
-        </AnimatePresence>
+      </AnimatePresence>
 
-        <ToastContainer position="bottom-right" autoClose={3000} />
-      </AuthProvider>
+      <ToastContainer position="bottom-right" autoClose={3000} />
     </>
   );
 };

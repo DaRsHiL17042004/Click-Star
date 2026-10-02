@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
 import { useAuth } from "../../context/AuthContext";  // AuthContext hook
+import { toast } from "react-toastify";
 import Header from "../../components/layout/Header";
 import Footer from "../../components/layout/Footer";
+import { motion } from "framer-motion";
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
